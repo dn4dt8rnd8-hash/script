@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roblox Studio Script Library</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10131c;
+      --panel: #191e2b;
+      --border: #2b3345;
+      --text: #edf1fa;
+      --muted: #9aa5ba;
+      --accent: #8b7cff;
+      --accent-hover: #a297ff;
+      --danger: #ff7b83;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 system-ui, sans-serif;
+    }
+
+    header {
+      padding: 28px max(20px, calc((100% - 1100px) / 2));
+      border-bottom: 1px solid var(--border);
+      background: #141824;
+    }
+
+    header h1 { margin: 0 0 5px; font-size: 24px; }
+    header p { margin: 0; color: var(--muted); }
+
+    main {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 20px;
+    }
+
+    .notice {
+      margin-bottom: 20px;
+      padding: 12px 15px;
+      border: 1px solid #665836;
+      border-radius: 10px;
+      background: #292416;
+      color: #f2d89b;
+    }
+
+    nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 13px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    button:hover { border-color: var(--accent); }
+    button.active, .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    button.active:hover, .primary:hover { background: var(--accent-hover); }
+
+    .panel, .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
+    }
+
+    .panel { padding: 20px; }
+    .panel h2 { margin: 0 0 16px; font-size: 19px; }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: var(--muted);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: #111621;
+      color: var(--text);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 220px;
+      resize: vertical;
+      font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .toolbar input { flex: 1; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .card { padding: 16px; min-width: 0; }
+    .card h3 { margin: 0 0 4px; overflow-wrap: anywhere; }
+    .meta { color: var(--muted); font-size: 13px; }
+    .description { color: #c4ccda; white-space: pre-wrap; }
+    pre {
+      overflow: auto;
+      max-height: 220px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #10141d;
+      color: #dce4f6;
+      font-size: 12px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .card-actions { display: flex; gap: 8px; }
+    .delete { color: var(--danger); }
+    .empty { color: var(--muted); text-align: center; padding: 35px 10px; }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 600px) {
+      .toolbar, nav { flex-wrap: wrap; }
+      .toolbar input { flex-basis: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Roblox Studio Script Library</h1>
+    <p>Tạo và quản lý các snippet dành cho trải nghiệm Roblox của bạn.</p>
+  </header>
+
+  <main>
+    <div class="notice">
+      Chỉ dùng script trong Roblox Studio cho game bạn sở hữu hoặc được phép chỉnh sửa.
+      Trang này không dành cho cheat, executor hay can thiệp vào game của người khác.
+    </div>
+
+    <nav aria-label="Điều hướng">
+      <button id="createTab" class="active" type="button">Tạo script</button>
+      <button id="libraryTab" type="button">Tất cả script</button>
+    </nav>
+
+    <section id="createView" class="panel">
+      <h2>Thêm script mới</h2>
+      <form id="scriptForm">
+        <label for="title">Tên script</label>
+        <input id="title" maxlength="80" required placeholder="Ví dụ: Tạo bảng Coins" />
+
+        <label for="category">Loại</label>
+        <select id="category">
+          <option>Gameplay</option>
+          <option>UI</option>
+          <option>Data</option>
+          <option>Khác</option>
+        </select>
+
+        <label for="description">Mô tả</label>
+        <input id="description" maxlength="180" placeholder="Script này dùng để làm gì?" />
+
+        <label for="code">Mã Luau</label>
+        <textarea id="code" required spellcheck="false"
+          placeholder="Dán hoặc viết script Roblox Studio của bạn tại đây..."></textarea>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Lưu script</button>
+          <button id="fillExample" type="button">Điền ví dụ an toàn</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="libraryView" hidden>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Tìm theo tên, mô tả hoặc loại..." />
+        <select id="filterCategory" aria-label="Lọc theo loại">
+          <option value="">Tất cả loại</option>
+          <option>Gameplay</option>
+          <option>UI</option>
+          <option>Data</option>
+          <option>Khác</option>
+        </select>
+      </div>
+      <div id="scriptList" class="grid"></div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "roblox-studio-script-library-v1";
+
+    const example = {
+      title: "Tạo bảng Coins",
+      category: "Data",
+      description: "Ví dụ ServerScriptService cho game của bạn: tạo leaderstats và giá trị Coins.",
+      code: `-- Đặt Script này trong ServerScriptService của game bạn
+game.Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+end)`
+    };
+
+    const form = document.querySelector("#scriptForm");
+    const titleInput = document.querySelector("#title");
+    const categoryInput = document.querySelector("#category");
+    const descriptionInput = document.querySelector("#description");
+    const codeInput = document.querySelector("#code");
+    const list = document.querySelector("#scriptList");
+
+    function getScripts() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveScripts(scripts) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+    }
+
+    function showView(view) {
+      const isCreate = view === "create";
+      document.querySelector("#createView").hidden = !isCreate;
+      document.querySelector("#libraryView").hidden = isCreate;
+      document.querySelector("#createTab").classList.toggle("active", isCreate);
+      document.querySelector("#libraryTab").classList.toggle("active", !isCreate);
+      if (!isCreate) renderScripts();
+    }
+
+    function renderScripts() {
+      const query = document.querySelector("#search").value.trim().toLowerCase();
+      const category = document.querySelector("#filterCategory").value;
+
+      const scripts = getScripts().filter(script => {
+        const text = `${script.title} ${script.description} ${script.category}`.toLowerCase();
+        return text.includes(query) && (!category || script.category === category);
+      });
+
+      list.replaceChildren();
+
+      if (!scripts.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "Chưa có script phù hợp. Hãy tạo script đầu tiên ở mục “Tạo script”.";
+        list.append(empty);
+        return;
+      }
+
+      for (const script of scripts) {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const heading = document.createElement("h3");
+        heading.textContent = script.title;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = `${script.category} · ${new Date(script.createdAt).toLocaleDateString("vi-VN")}`;
+
+        const description = document.createElement("p");
+        description.className = "description";
+        description.textContent = script.description || "Không có mô tả.";
+
+        const code = document.createElement("pre");
+        code.textContent = script.code;
+
+        const actions = document.createElement("div");
+        actions.className = "card-actions";
+
+        const copyButton = document.createElement("button");
+        copyButton.type = "button";
+        copyButton.textContent = "Sao chép";
+        copyButton.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(script.code);
+            copyButton.textContent = "Đã sao chép";
+            setTimeout(() => copyButton.textContent = "Sao chép", 1200);
+          } catch {
+            alert("Không thể truy cập clipboard. Hãy sao chép mã thủ công.");
+          }
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "delete";
+        deleteButton.textContent = "Xóa";
+        deleteButton.addEventListener("click", () => {
+          if (!confirm(`Xóa script “${script.title}”?`)) return;
+          saveScripts(getScripts().filter(item => item.id !== script.id));
+          renderScripts();
+        });
+
+        actions.append(copyButton, deleteButton);
+        card.append(heading, meta, description, code, actions);
+        list.append(card);
+      }
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const script = {
+        id: crypto.randomUUID(),
+        title: titleInput.value.trim(),
+        category: categoryInput.value,
+        description: descriptionInput.value.trim(),
+        code: codeInput.value.trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      if (!script.title || !script.code) return;
+
+      saveScripts([script, ...getScripts()]);
+      form.reset();
+      showView("library");
+    });
+
+    document.querySelector("#fillExample").addEventListener("click", () => {
+      titleInput.value = example.title;
+      categoryInput.value = example.category;
+      descriptionInput.value = example.description;
+      codeInput.value = example.code;
+    });
+
+    document.querySelector("#createTab").addEventListener("click", () => showView("create"));
+    document.querySelector("#libraryTab").addEventListener("click", () => showView("library"));
+    document.querySelector("#search").addEventListener("input", renderScripts);
+    document.querySelector("#filterCategory").addEventListener("change", renderScripts);
+
+    renderScripts();
+  </script>
+</body>
+</html>
